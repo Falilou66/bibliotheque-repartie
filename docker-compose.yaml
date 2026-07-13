@@ -37,6 +37,7 @@ services:
     ports:
       - "8001:8000" # Interface Web UGB
     volumes:
+      - ./app:/code
       - journal_ugb:/data # Journal 2PC pour la reprise sur panne applicative
     depends_on:
       db_ugb:
@@ -79,6 +80,7 @@ services:
     ports:
       - "8002:8000" # Interface Web UCAD
     volumes:
+      - ./app:/code
       - journal_ucad:/data
     depends_on:
       db_ucad:
@@ -121,6 +123,7 @@ services:
     ports:
       - "8003:8000" # Interface Web UADB
     volumes:
+      - ./app:/code
       - journal_uadb:/data
     depends_on:
       db_uadb:
