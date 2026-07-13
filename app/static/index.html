@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDR - Système Réparti de Bibliothèques</title>
+    <!-- Intégration de Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="h-full text-slate-800 flex flex-col">
+
+    <!-- Alerte si panne d'un site (Mode Dégradé) -->
+    <div id="banniere-indisponible" class="hidden bg-rose-600 text-white text-center py-2.5 px-4 font-bold text-sm shadow-md animate-pulse">
+        ⚠️ Mode Dégradé : Des serveurs distants ne répondent pas. Les données affichées peuvent être partielles.
+    </div>
+
+    <!-- Bandeau supérieur dynamique par site -->
+    <header id="site-header" class="bg-slate-800 text-white px-6 py-5 shadow-md transition-colors duration-500">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 id="nom-site-titre" class="text-2xl font-bold tracking-tight">Bibliothèque Inter-Universitaire</h1>[cite: 1]
+                <p class="text-xs text-slate-400 mt-0.5">Master 2 Systèmes d'Information — UADB / UFR SATIC</p>[cite: 1]
+            </div>
+            <div id="nom-site-badge" class="bg-white text-slate-800 text-sm font-extrabold px-4 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
+                Chargement...
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteneur Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+        
+        <!-- 1. TABLEAU DE BORD (STATISTIQUES) -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div class="bg-white p-6 rounded-xl shadow-xs border border-slate-100 flex flex-col items-center justify-center text-center">
+                <span class="text-sm font-medium text-slate-500 uppercase tracking-wider">Ouvrages disponibles</span>
+                <h2 id="stat-ouvrages" class="text-4xl font-black text-slate-900 mt-2">-</h2>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-xs border border-slate-100 flex flex-col items-center justify-center text-center">
+                <span class="text-sm font-medium text-slate-500 uppercase tracking-wider">Étudiants inscrits</span>
+                <h2 id="stat-etudiants" class="text-4xl font-black text-slate-900 mt-2">-</h2>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-xs border border-slate-100 flex flex-col items-center justify-center text-center">
+                <span class="text-sm font-medium text-slate-500 uppercase tracking-wider">Prêts actifs</span>
+                <h2 id="stat-prets" class="text-4xl font-black text-slate-900 mt-2">-</h2>
+            </div>
+        </section>
+
+        <!-- 2. SECTION COMMUNE CATALOGUE & CONFIGURATION -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <!-- CATALOGUE -->
+            <div class="bg-white rounded-xl shadow-xs border border-slate-200/80 p-5 sm:p-6 lg:col-span-2 space-y-4">
+                <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                    <span>🔍</span> Catalogue Réparti des Ouvrages[cite: 1, 2]
+                </h3>
+                
+                <!-- Filtres de recherche -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <input type="text" id="search-query" placeholder="Rechercher par titre..." 
+                           class="sm:col-span-1 bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 block w-full p-2.5">
+                    <select id="search-scope" 
+                            class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 block w-full p-2.5">
+                        <option value="global">Tout le réseau (Global)</option>
+                        <option value="local">Cette bibliothèque uniquement</option>[cite: 2]
+                    </select>
+                    <button onclick="chargerCatalogue()" id="btn-recherche"
+                            class="text-white bg-slate-800 hover:bg-slate-700 font-bold rounded-lg text-sm px-5 py-2.5 text-center cursor-pointer shadow-xs transition-colors">
+                        Rechercher
+                    </button>
+                </div>
+
+                <!-- Tableau du catalogue -->
+                <div class="overflow-x-auto rounded-lg border border-slate-100">
+                    <table id="table-catalogue" class="w-full text-sm text-left text-slate-500">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="px-4 py-3">Titre</th>
+                                <th class="px-4 py-3">Auteur</th>
+                                <th class="px-4 py-3">Site</th>
+                                <th class="px-4 py-3">Stock</th>
+                                <th class="px-4 py-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white text-slate-900 font-medium">
+                            <!-- Rempli par JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ACTION EMPRUNT (2PC) -->
+            <div class="bg-white rounded-xl shadow-xs border border-slate-200/80 p-5 sm:p-6 space-y-4">
+                <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                    <span>📚</span> Enregistrer un Emprunt (2PC)[cite: 1, 2]
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="emprunt-id-ouv" class="block mb-1.5 text-sm font-semibold text-slate-700">ID de l'Ouvrage</label>
+                        <input type="number" id="emprunt-id-ouv" readonly placeholder="Sélectionnez un ouvrage via la table" 
+                               class="bg-slate-100 border border-slate-300 text-slate-500 text-sm rounded-lg block w-full p-2.5 font-mono cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label for="emprunt-id-etud" class="block mb-1.5 text-sm font-semibold text-slate-700">ID de l'Étudiant</label>
+                        <input type="number" id="emprunt-id-etud" placeholder="Exemple : 12" 
+                               class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-slate-500 block w-full p-2.5">
+                    </div>
+                    <button onclick="effectuerEmprunt()" id="btn-action-emprunt"
+                            class="text-white bg-slate-800 hover:bg-slate-700 font-bold rounded-lg text-sm px-5 py-3 text-center cursor-pointer shadow-xs w-full transition-colors pt-4">
+                        Valider l'emprunt réseau
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. CONSOLE DE CONTROLE ADMINISTRATIF XA -->
+        <section class="bg-white rounded-xl shadow-xs border border-slate-200/80 p-5 sm:p-6 space-y-4">
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>⚙️</span> Console de Validation Répartie
+                </h3>
+                <p class="text-xs text-slate-500 mt-1">Surveillance en temps réel des transactions suspendues (`XA RECOVER`) et résolution forcée via le journal.</p>[cite: 1, 2]
+            </div>
+            
+            <div class="overflow-x-auto rounded-lg border border-slate-100">
+                <table id="table-xa" class="w-full text-sm text-left text-slate-500">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3">Transaction ID (txid)</th>[cite: 2]
+                            <th class="px-4 py-3">Hôte Participant</th>[cite: 2]
+                            <th class="px-4 py-3">Décision Journalisée</th>[cite: 2]
+                            <th class="px-4 py-3 text-center">Action de Secours</th>[cite: 2]
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white text-slate-900 font-medium">
+                        <!-- Rempli par JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let currentSite = "";
+        const apiBase = "/api";
+        
+        // Configuration des palettes de couleurs Tailwind pour la démo
+        const siteConfigs = {
+            "UGB":  { bg: "bg-blue-700",  hover: "hover:bg-blue-800",  ring: "focus:ring-blue-500",  text: "text-blue-700"  },[cite: 2]
+            "UCAD": { bg: "bg-emerald-700", hover: "hover:bg-emerald-800", ring: "focus:ring-emerald-500", text: "text-emerald-700" },[cite: 2]
+            "UADB": { bg: "bg-amber-700", hover: "hover:bg-amber-800", ring: "focus:ring-amber-500", text: "text-amber-700" }[cite: 2]
+        };
+
+        async function initApp() {
+            try {
+                const res = await fetch(`${apiBase}/stats`);
+                const data = await res.json();
+                currentSite = data.site;[cite: 2]
+                
+                const cfg = siteConfigs[currentSite] || siteConfigs["UGB"];
+                
+                // Remplacement dynamique des classes Tailwind pour le code couleur
+                const header = document.getElementById('site-header');
+                header.className = `${cfg.bg} text-white px-6 py-5 shadow-md transition-colors duration-500`;
+                
+                const badge = document.getElementById('nom-site-badge');
+                badge.className = `bg-white ${cfg.text} text-sm font-extrabold px-4 py-1.5 rounded-full shadow-sm uppercase tracking-wider`;
+                badge.innerText = currentSite;[cite: 2]
+                
+                document.getElementById('nom-site-titre').innerText = `Système Réparti de Bibliothèques — Site ${currentSite}`;[cite: 2]
+                
+                // Appliquer les couleurs de focus et boutons
+                document.getElementById('btn-recherche').className = `text-white ${cfg.bg} ${cfg.hover} font-bold rounded-lg text-sm px-5 py-2.5 text-center cursor-pointer shadow-xs transition-colors`;
+                document.getElementById('btn-action-emprunt').className = `text-white ${cfg.bg} ${cfg.hover} font-bold rounded-lg text-sm px-5 py-3 text-center cursor-pointer shadow-xs w-full transition-colors`;
+                
+                chargerStats();
+                chargerCatalogue();
+                chargerTransactionsDouteuses();
+            } catch (err) {
+                console.error("Erreur d'initialisation :", err);
+            }
+        }
+
+        async function chargerStats() {
+            const res = await fetch(`${apiBase}/stats`);
+            const data = await res.json();
+            document.getElementById('stat-ouvrages').innerText = data.total_ouvrages || 0;[cite: 2]
+            document.getElementById('stat-etudiants').innerText = data.total_etudiants || 0;[cite: 2]
+            document.getElementById('stat-prets').innerText = data.total_prets_encours || 0;[cite: 2]
+        }
+
+        async function chargerCatalogue() {
+            const scope = document.getElementById('search-scope').value;[cite: 2]
+            const query = document.getElementById('search-query').value;[cite: 2]
+            
+            const res = await fetch(`${apiBase}/ouvrages?scope=${scope}&q=${query}`);[cite: 2]
+            const data = await res.json();
+            
+            if (data.sites_indisponibles && data.sites_indisponibles.length > 0) {[cite: 2]
+                document.getElementById('banniere-indisponible').classList.remove('hidden');[cite: 2]
+            } else {
+                document.getElementById('banniere-indisponible').classList.add('hidden');[cite: 2]
+            }
+
+            const tbody = document.querySelector('#table-catalogue tbody');
+            tbody.innerHTML = "";
+            
+            // Configuration des badges d'universités
+            const badgeColors = {
+                "UGB": "bg-blue-100 text-blue-800 border-blue-200",
+                "UCAD": "bg-emerald-100 text-emerald-800 border-emerald-200",
+                "UADB": "bg-amber-100 text-amber-800 border-amber-200"
+            };
+
+            data.ouvrages.forEach(ouv => {[cite: 2]
+                const bClass = badgeColors[ouv.site] || "bg-slate-100 text-slate-800";
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-4 py-3.5 font-semibold text-slate-900">${ouv.titre}</td>[cite: 2]
+                    <td class="px-4 py-3.5 text-slate-600">${ouv.nom_auteur}</td>[cite: 2]
+                    <td class="px-4 py-3.5"><span class="px-2.5 py-1 text-xs font-bold rounded-md border ${bClass}">${ouv.site}</span></td>[cite: 2]
+                    <td class="px-4 py-3.5 text-slate-600 font-mono">${ouv.stock}</td>[cite: 2]
+                    <td class="px-4 py-3.5 text-center">
+                        <button onclick="selectionnerOuvrage(${ouv.id_ouv})" class="px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors cursor-pointer">Sélectionner</button>[cite: 2]
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function selectionnerOuvrage(id) {
+            document.getElementById('emprunt-id-ouv').value = id;[cite: 2]
+        }
+
+        async function effectuerEmprunt() {
+            const id_ouv = document.getElementById('emprunt-id-ouv').value;[cite: 2]
+            const id_etud = document.getElementById('emprunt-id-etud').value;[cite: 2]
+            
+            if(!id_ouv || !id_etud) return alert("Veuillez renseigner un ouvrage et un étudiant.");
+
+            const res = await fetch(`${apiBase}/prets`, {[cite: 2]
+                method: 'POST',[cite: 2]
+                headers: { 'Content-Type': 'application/json' },[cite: 2]
+                body: JSON.stringify({ id_ouv: parseInt(id_ouv), id_etud: parseInt(id_etud) })[cite: 2]
+            });
+
+            if (res.status === 201) {[cite: 2]
+                alert("🎉 Emprunt validé avec succès par le Coordinateur 2PC !");[cite: 2]
+                chargerStats();[cite: 2]
+                chargerCatalogue();[cite: 2]
+            } else if (res.status === 409) {[cite: 2]
+                alert("❌ Transaction annulée (Rollback) : Limite d'emprunts atteinte (max 5) ou étudiant inconnu.");[cite: 2]
+            } else {
+                alert("🚨 Échec critique lors du protocole de validation à deux phases.");
+            }
+        }
+
+        async function chargerTransactionsDouteuses() {
+            const res = await fetch(`${apiBase}/admin/xa`);[cite: 2]
+            const txs = await res.json();[cite: 2]
+            const tbody = document.querySelector('#table-xa tbody');
+            tbody.innerHTML = "";
+
+            if(txs.length === 0) {[cite: 2]
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-sm font-semibold text-emerald-600 bg-emerald-50/50">Aucune transaction douteuse suspendue dans les bases (Cohérence ACID OK)</td></tr>`;[cite: 2]
+                return;
+            }
+
+            txs.forEach(tx => {[cite: 2]
+                const tr = document.createElement('tr');
+                tr.className = "bg-rose-50/30 hover:bg-rose-50/60 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-4 py-3.5 font-mono text-xs text-rose-700">${tx.txid}</td>[cite: 2]
+                    <td class="px-4 py-3.5 text-slate-700 text-xs">${tx.hote}</td>[cite: 2]
+                    <td class="px-4 py-3.5 text-xs"><span class="px-2 py-0.5 rounded-sm font-bold bg-slate-200 text-slate-800">${tx.decision}</span></td>[cite: 2]
+                    <td class="px-4 py-3.5 text-center">
+                        <button onclick="resoudreManuellement('${tx.txid}')" class="px-3 py-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-md shadow-xs transition-colors cursor-pointer">Forcer Résolution</button>[cite: 2]
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function resoudreManuellement(txid) {[cite: 2]
+            await fetch(`${apiBase}/admin/xa/${txid}/resoudre`, { method: 'POST' });[cite: 2]
+            alert("Ordre de synchronisation envoyé au participant.");[cite: 2]
+            chargerTransactionsDouteuses();[cite: 2]
+        }
+
+        // Auto-démarrage
+        initApp();
+    </script>
+</body>
+</html>
