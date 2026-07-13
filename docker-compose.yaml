@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  # SITE UGB (Université Gaston Berger)
+
+  # Base de données MySQL avec moteur FEDERATED pour les lectures réparties
+  db_ugb:
+    image: mysql:8.4
+    container_name: db_ugb
+    command: --federated # ici j'active le moteur FEDERATED pour les lectures réparties
+    environment:
+      MYSQL_DATABASE: bilbio
+      MYSQL_USER: biblio
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - ./sql/ugb:/docker-entrypoint-initdb.d:ro # Schéma local + seed initial
+      - data_ugb:/var/lib/mysql
+    ports:
+      - "33061:3306" # Accès direct SQL externe pour la démo
+    networks:
+      - reseau_biblio
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ubiblio", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+# Application web pour le site UGB, qui se connecte à la base de données locale et aux bases distantes via FEDERATED
+  app_ugb:
+    build: ./app
+    container_name: app_ugb
+    environment:
+      SITE_NAME: UGB
+      DB_HOST: db_ugb
+      PEERS: "UCAD:db_ucad,UADB:db_uadb" # Contrat d'interface pour le routage de P2
+    ports:
+      - "8001:8000" # Interface Web UGB
+    volumes:
+      - journal_ugb:/data # Journal 2PC pour la reprise sur panne applicative
+    depends_on:
+      db_ugb:
+        condition: service_healthy # Attend que MySQL soit totalement prêt
+    networks:
+      - reseau_biblio
+
+  # ---
+  # SITE UCAD (Université Cheikh Anta Diop)
+  # ---
+  db_ucad:
+    image: mysql:8.4
+    container_name: db_ucad
+    command: --federated
+    environment:
+      MYSQL_DATABASE: bilbio
+      MYSQL_USER: biblio
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - ./sql/ucad:/docker-entrypoint-initdb.d:ro
+      - data_ucad:/var/lib/mysql
+    ports:
+      - "33062:3306"
+    networks:
+      - reseau_biblio
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ubiblio", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app_ucad:
+    build: ./app
+    container_name: app_ucad
+    environment:
+      SITE_NAME: UCAD
+      DB_HOST: db_ucad
+      PEERS: "UGB:db_ugb,UADB:db_uadb"
+    ports:
+      - "8002:8000" # Interface Web UCAD
+    volumes:
+      - journal_ucad:/data
+    depends_on:
+      db_ucad:
+        condition: service_healthy
+    networks:
+      - reseau_biblio
+
+  # ==========================================
+  # SITE UADB (Université Alioune Diop de Bambey)
+  # ==========================================
+  db_uadb:
+    image: mysql:8.4
+    container_name: db_uadb
+    command: --federated
+    environment:
+      MYSQL_DATABASE: bilbio
+      MYSQL_USER: biblio
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - ./sql/uadb:/docker-entrypoint-initdb.d:ro
+      - data_uadb:/var/lib/mysql
+    ports:
+      - "33063:3306"
+    networks:
+      - reseau_biblio
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ubiblio", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app_uadb:
+    build: ./app
+    container_name: app_uadb
+    environment:
+      SITE_NAME: UADB
+      DB_HOST: db_uadb
+      PEERS: "UGB:db_ugb,UCAD:db_ucad"
+    ports:
+      - "8003:8000" # Interface Web UADB
+    volumes:
+      - journal_uadb:/data
+    depends_on:
+      db_uadb:
+        condition: service_healthy
+    networks:
+      - reseau_biblio
+
+# ==========================================
+# RÉSEAU ET VOLUMES COMMUNS
+# ==========================================
+networks:
+  reseau_biblio:
+    name: Clock_network_biblio
+
+volumes:
+  data_ugb:
+  data_ucad:
+  data_uadb:
+  journal_ugb:
+  journal_ucad:
+  journal_uadb:
