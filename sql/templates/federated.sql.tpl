@@ -24,7 +24,7 @@ CREATE TABLE ft_etudiant_@PEER1@ (
     specialite VARCHAR(80),
     nbre_emprunts INT NOT NULL
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST1@:3306/biblio/etudiant';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST1@:3306/biblio/etudiant';
 
 CREATE TABLE ft_etudiant_@PEER2@ (
     id_etud INT,
@@ -34,7 +34,7 @@ CREATE TABLE ft_etudiant_@PEER2@ (
     specialite VARCHAR(80),
     nbre_emprunts INT NOT NULL
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST2@:3306/biblio/etudiant';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST2@:3306/biblio/etudiant';
 
 -- ======================================================
 -- OUVRAGES
@@ -53,7 +53,7 @@ CREATE TABLE ft_ouvrage_@PEER1@ (
     stock INT NOT NULL,
     site VARCHAR(10) NOT NULL
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST1@:3306/biblio/ouvrage';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST1@:3306/biblio/ouvrage';
 
 CREATE TABLE ft_ouvrage_@PEER2@ (
     id_ouv INT,
@@ -65,7 +65,7 @@ CREATE TABLE ft_ouvrage_@PEER2@ (
     stock INT NOT NULL,
     site VARCHAR(10) NOT NULL
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST2@:3306/biblio/ouvrage';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST2@:3306/biblio/ouvrage';
 
 -- ======================================================
 -- PRETS
@@ -81,7 +81,7 @@ CREATE TABLE ft_pret_@PEER1@ (
     date_emprunt DATETIME NOT NULL,
     date_retour DATETIME
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST1@:3306/biblio/pret';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST1@:3306/biblio/pret';
 
 CREATE TABLE ft_pret_@PEER2@ (
     id_pret INT,
@@ -90,7 +90,7 @@ CREATE TABLE ft_pret_@PEER2@ (
     date_emprunt DATETIME NOT NULL,
     date_retour DATETIME
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST2@:3306/biblio/pret';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST2@:3306/biblio/pret';
 
 -- ======================================================
 -- EMPLOYES
@@ -106,7 +106,7 @@ CREATE TABLE ft_employe_@PEER1@ (
     statut VARCHAR(60),
     bibliotheque VARCHAR(10) NOT NULL
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST1@:3306/biblio/employe';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST1@:3306/biblio/employe';
 
 CREATE TABLE ft_employe_@PEER2@ (
     id_emp INT,
@@ -115,7 +115,7 @@ CREATE TABLE ft_employe_@PEER2@ (
     statut VARCHAR(60),
     bibliotheque VARCHAR(10) NOT NULL
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST2@:3306/biblio/employe';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST2@:3306/biblio/employe';
 
 -- ======================================================
 -- AUTEURS
@@ -128,13 +128,13 @@ CREATE TABLE ft_auteur_@PEER1@ (
     id_aut INT,
     nom_auteur VARCHAR(120) NOT NULL
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST1@:3306/biblio/auteur';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST1@:3306/biblio/auteur';
 
 CREATE TABLE ft_auteur_@PEER2@ (
     id_aut INT,
     nom_auteur VARCHAR(120) NOT NULL
 ) ENGINE=FEDERATED
-CONNECTION='mysql://biblio:@PASSWORD@@HOST2@:3306/biblio/auteur';
+CONNECTION='mysql://biblio:@PASSWORD@@@HOST2@:3306/biblio/auteur';
 
 -- ======================================================
 -- VUES GLOBALES
@@ -147,12 +147,14 @@ SELECT * FROM ft_auteur_@PEER1@
 UNION ALL
 SELECT * FROM ft_auteur_@PEER2@;
 
+-- Colonnes explicites : la table locale employe possède aussi login/mot_de_passe
+-- (auth locale), qui ne sont NI répliqués NI exposés dans la vue globale.
 CREATE OR REPLACE VIEW employe_global AS
-SELECT * FROM employe
+SELECT id_emp, nom, adresse, statut, bibliotheque FROM employe
 UNION ALL
-SELECT * FROM ft_employe_@PEER1@
+SELECT id_emp, nom, adresse, statut, bibliotheque FROM ft_employe_@PEER1@
 UNION ALL
-SELECT * FROM ft_employe_@PEER2@;
+SELECT id_emp, nom, adresse, statut, bibliotheque FROM ft_employe_@PEER2@;
 
 CREATE OR REPLACE VIEW etudiant_global AS
 SELECT * FROM etudiant

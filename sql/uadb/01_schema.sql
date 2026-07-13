@@ -1,6 +1,6 @@
 -- =====================================================
 -- Modèle de schéma SQL
--- Le marqueur @SITE@ sera remplacé par UGB, UCAD ou UADB
+-- Le marqueur UADB sera remplacé par UGB, UCAD ou UADB
 -- =====================================================
 
 DROP TABLE IF EXISTS pret;
@@ -35,7 +35,7 @@ CREATE TABLE employe (
     mot_de_passe VARCHAR(120),
 
     CONSTRAINT chk_emp_site
-        CHECK (bibliotheque = '@SITE@'),
+        CHECK (bibliotheque = 'UADB'),
     CONSTRAINT uq_emp_login UNIQUE (login)
 ) ENGINE=InnoDB;
 
@@ -52,7 +52,7 @@ CREATE TABLE etudiant (
     nbre_emprunts INT NOT NULL DEFAULT 0,
 
     CONSTRAINT chk_etu_site
-        CHECK (universite = '@SITE@'),
+        CHECK (universite = 'UADB'),
 
     CONSTRAINT chk_limite
         CHECK (nbre_emprunts BETWEEN 0 AND 5)
@@ -77,7 +77,7 @@ CREATE TABLE ouvrage (
         REFERENCES auteur(id_aut),
 
     CONSTRAINT chk_ouvrage_site
-        CHECK (site = '@SITE@'),
+        CHECK (site = 'UADB'),
 
     CONSTRAINT chk_stock
         CHECK (stock >= 0),

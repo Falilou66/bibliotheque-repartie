@@ -1,2 +1,12 @@
-./.env
+# Secrets / configuration locale
+.env
 
+# Python
+__pycache__/
+*.pyc
+
+# SQL fédéré généré au runtime (contient le mot de passe en clair)
+sql/generated/
+
+# Cache de build du frontend
+scripts/.build/

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # SITE UGB (Université Gaston Berger)
 
@@ -9,7 +7,7 @@ services:
     container_name: db_ugb
     command: --federated # ici j'active le moteur FEDERATED pour les lectures réparties
     environment:
-      MYSQL_DATABASE: bilbio
+      MYSQL_DATABASE: biblio
       MYSQL_USER: biblio
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
@@ -33,6 +31,8 @@ services:
     environment:
       SITE_NAME: UGB
       DB_HOST: db_ugb
+      DB_USER: biblio
+      DB_PASSWORD: ${DB_PASSWORD}
       PEERS: "UCAD:db_ucad,UADB:db_uadb" # Contrat d'interface pour le routage de P2
     ports:
       - "8001:8000" # Interface Web UGB
@@ -53,7 +53,7 @@ services:
     container_name: db_ucad
     command: --federated
     environment:
-      MYSQL_DATABASE: bilbio
+      MYSQL_DATABASE: biblio
       MYSQL_USER: biblio
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
@@ -76,6 +76,8 @@ services:
     environment:
       SITE_NAME: UCAD
       DB_HOST: db_ucad
+      DB_USER: biblio
+      DB_PASSWORD: ${DB_PASSWORD}
       PEERS: "UGB:db_ugb,UADB:db_uadb"
     ports:
       - "8002:8000" # Interface Web UCAD
@@ -96,7 +98,7 @@ services:
     container_name: db_uadb
     command: --federated
     environment:
-      MYSQL_DATABASE: bilbio
+      MYSQL_DATABASE: biblio
       MYSQL_USER: biblio
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
@@ -119,6 +121,8 @@ services:
     environment:
       SITE_NAME: UADB
       DB_HOST: db_uadb
+      DB_USER: biblio
+      DB_PASSWORD: ${DB_PASSWORD}
       PEERS: "UGB:db_ugb,UCAD:db_ucad"
     ports:
       - "8003:8000" # Interface Web UADB

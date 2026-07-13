@@ -42,13 +42,15 @@ create_server_links() {
     echo "🔗 Configuration des liens distants sur db_${SITE}..."
 
     docker compose exec -T "db_${SITE}" mysql -u"${DB_USER}" -p"${DB_ROOT_PASS}" -e "
-CREATE SERVER IF NOT EXISTS link_${PEER1}
+DROP SERVER IF EXISTS link_${PEER1};
+CREATE SERVER link_${PEER1}
 FOREIGN DATA WRAPPER mysql
-OPTIONS (USER 'biblio', PASSWORD '${DB_PASSWORD}', HOST '${HOST1}', PORT 3306, DATABASE 'bilbio');
+OPTIONS (USER 'biblio', PASSWORD '${DB_PASSWORD}', HOST '${HOST1}', PORT 3306, DATABASE 'biblio');
 
-CREATE SERVER IF NOT EXISTS link_${PEER2}
+DROP SERVER IF EXISTS link_${PEER2};
+CREATE SERVER link_${PEER2}
 FOREIGN DATA WRAPPER mysql
-OPTIONS (USER 'biblio', PASSWORD '${DB_PASSWORD}', HOST '${HOST2}', PORT 3306, DATABASE 'bilbio');
+OPTIONS (USER 'biblio', PASSWORD '${DB_PASSWORD}', HOST '${HOST2}', PORT 3306, DATABASE 'biblio');
 "
 }
 
