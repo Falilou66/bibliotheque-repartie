@@ -119,7 +119,8 @@ bibliotheque-repartie/
 │   └── static/
 │       ├── index.html             # Shell HTML (Tailwind CDN, React UMD)
 │       ├── app.jsx                # Source React (à éditer)
-│       └── app.js                 # Généré par scripts/build_front.sh (ne pas éditer à la main)
+│       ├── app.js                 # Généré par scripts/build_front.sh (ne pas éditer à la main)
+│       └── img/                   # Photos de campus par site (ugb.jpg / ucad.jpg / uadb.jpeg), landing page
 │
 ├── scripts/
 │   ├── build_front.sh            # Compile app.jsx -> app.js (Babel, une fois, hors navigateur)
@@ -326,12 +327,19 @@ qu'aucun conteneur MySQL n'a été redémarré/OOM-killé entre-temps (`docker p
 
 **Un conteneur `db_*` passe à `Exited (137)`**
 → `137` = tué par l'OOM killer. 3 instances MySQL 8.4 + 3 apps consomment facilement
-~1,5-2 Go au repos : augmentez la mémoire allouée à Docker Desktop (Settings → Resources →
-Memory, viser 4 Go+), puis `docker start db_<site>` et relancez `setup_federated.sh` si
-nécessaire.
+~1,5-2 Go au repos. Deux mitigations déjà en place dans `docker-compose.yaml` :
+`restart: unless-stopped` (le conteneur redémarre seul) et `--performance-schema=OFF`
+sur chaque base (empreinte mémoire divisée par ~2,5). Si l'OOM persiste malgré tout,
+augmentez la mémoire allouée à Docker Desktop (Settings → Resources → Memory, viser 4 Go+).
 
 **`ERROR 1146` sur une table `ft_*` ou une vue `*_global`**
 → `setup_federated.sh` n'a pas encore tourné sur ce site (ou les volumes ont été recréés).
+
+**Caractères accentués corrompus (`Ã©`, `BibliothÃ©caire`, …)**
+→ Symptôme d'un double encodage UTF-8 : le client `mysql` utilisé par
+`docker-entrypoint-initdb.d` retombe sur `latin1` par défaut si le script SQL ne force pas
+la session. Les fichiers `sql/seeds/seed_*.sql` commencent par `SET NAMES utf8mb4;` pour
+l'éviter — si vous ajoutez un nouveau fichier seed, reprenez cette ligne en premier.
 
 **Recommencer de zéro (⚠️ efface toutes les données)**
 ```bash

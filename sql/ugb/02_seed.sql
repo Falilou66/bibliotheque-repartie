@@ -2,6 +2,12 @@
 -- DONNEES INITIALES - SITE UGB
 -- ==========================================
 --
+-- SET NAMES utf8mb4 : force la session du client mysql (docker-entrypoint-
+-- initdb.d) à traiter ce fichier comme de l'UTF-8, sinon le client retombe
+-- sur latin1 par défaut et les caractères accentués sont corrompus (double
+-- encodage UTF-8) en écriture dans les colonnes utf8mb4.
+SET NAMES utf8mb4;
+--
 -- Convention d'identifiants (disjonction des clés entre sites, cf. §2.4) :
 --   UGB  : etudiant 1..99    / ouvrage 1..99
 --   UCAD : etudiant 101..199 / ouvrage 101..199

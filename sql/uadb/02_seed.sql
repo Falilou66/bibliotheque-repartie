@@ -2,6 +2,11 @@
 -- DONNEES INITIALES - SITE UADB
 -- ==========================================
 -- Convention d'ids : UADB -> etudiant 201..299 / ouvrage 201..299 (cf. §2.4)
+--
+-- SET NAMES utf8mb4 : évite la corruption des caractères accentués (le
+-- client mysql utilisé par docker-entrypoint-initdb.d retombe sinon sur
+-- latin1 par défaut).
+SET NAMES utf8mb4;
 
 INSERT INTO auteur (id_aut, nom_auteur) VALUES
 (1,'Victor Hugo'),

@@ -2,6 +2,11 @@
 -- DONNEES INITIALES - SITE UCAD
 -- ==========================================
 -- Convention d'ids : UCAD -> etudiant 101..199 / ouvrage 101..199 (cf. §2.4)
+--
+-- SET NAMES utf8mb4 : évite la corruption des caractères accentués (le
+-- client mysql utilisé par docker-entrypoint-initdb.d retombe sinon sur
+-- latin1 par défaut).
+SET NAMES utf8mb4;
 
 -- AUTEURS (identiques sur tous les sites)
 
