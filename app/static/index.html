@@ -10,19 +10,56 @@
     <!-- Tailwind (CDN navigateur, comme le reste du projet) -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
+    <!-- Typographie premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <!-- React 18 + ReactDOM (builds UMD de production) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
     <style>
         html, body, #root { height: 100%; }
-        body { background: #0f172a; }
+        body { background: #0f172a; font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+        code, .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+        ::selection { background: #38bdf8; color: #0f172a; }
+
+        /* Scrollbar fine et discrète */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; background-clip: content-box; }
+
         /* Petit spinner de démarrage avant le montage de React */
         .boot { position: fixed; inset: 0; display: flex; align-items: center;
-                justify-content: center; color: #94a3b8; font-family: system-ui, sans-serif; }
+                justify-content: center; color: #94a3b8; font-family: 'Inter', system-ui, sans-serif; }
         .boot .ring { width: 42px; height: 42px; border: 3px solid #334155;
                 border-top-color: #38bdf8; border-radius: 50%; animation: spin .8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Animations d'entrée réutilisées dans l'app */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+        @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+        @keyframes floaty { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(0, -18px); } }
+        @keyframes drawLine { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+        @keyframes toastbar { from { width: 100%; } to { width: 0%; } }
+
+        .animate-fadein { animation: fadeIn .35s ease-out both; }
+        .animate-fadeup { animation: fadeUp .5s cubic-bezier(.16,1,.3,1) both; }
+        .animate-slidein { animation: slideInRight .3s cubic-bezier(.16,1,.3,1) both; }
+        .animate-scalein { animation: scaleIn .18s cubic-bezier(.16,1,.3,1) both; }
+        .animate-float { animation: floaty 7s ease-in-out infinite; }
+        .skeleton { position: relative; overflow: hidden; background: #e2e8f0; }
+        .skeleton::after {
+            content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent);
+            animation: shimmer 1.4s infinite;
+        }
     </style>
 </head>
 <body class="h-full">
