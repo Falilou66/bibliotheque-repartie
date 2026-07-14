@@ -5,7 +5,8 @@ services:
   db_ugb:
     image: mysql:8.4
     container_name: db_ugb
-    command: --federated # ici j'active le moteur FEDERATED pour les lectures réparties
+    restart: unless-stopped # redémarre seul si tué par l'OOM killer (mémoire Docker limitée)
+    command: --federated --performance-schema=OFF # FEDERATED pour les lectures réparties ; performance_schema coupé pour réduire l'empreinte mémoire
     environment:
       MYSQL_DATABASE: biblio
       MYSQL_USER: biblio
@@ -28,6 +29,7 @@ services:
   app_ugb:
     build: ./app
     container_name: app_ugb
+    restart: unless-stopped
     environment:
       SITE_NAME: UGB
       DB_HOST: db_ugb
@@ -51,7 +53,8 @@ services:
   db_ucad:
     image: mysql:8.4
     container_name: db_ucad
-    command: --federated
+    restart: unless-stopped
+    command: --federated --performance-schema=OFF
     environment:
       MYSQL_DATABASE: biblio
       MYSQL_USER: biblio
@@ -73,6 +76,7 @@ services:
   app_ucad:
     build: ./app
     container_name: app_ucad
+    restart: unless-stopped
     environment:
       SITE_NAME: UCAD
       DB_HOST: db_ucad
@@ -96,7 +100,8 @@ services:
   db_uadb:
     image: mysql:8.4
     container_name: db_uadb
-    command: --federated
+    restart: unless-stopped
+    command: --federated --performance-schema=OFF
     environment:
       MYSQL_DATABASE: biblio
       MYSQL_USER: biblio
@@ -118,6 +123,7 @@ services:
   app_uadb:
     build: ./app
     container_name: app_uadb
+    restart: unless-stopped
     environment:
       SITE_NAME: UADB
       DB_HOST: db_uadb
